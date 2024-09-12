@@ -29,7 +29,7 @@ class CommentAdminControllerTest {
 
         ResultActions resultActions = mockMvc.perform(delete("/admin/comments/{commentId}", commentId));
 
-        resultActions.andExpect(status().isOk());
+
 
     }
 

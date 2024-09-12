@@ -58,7 +58,7 @@ public class CommentControllerTest {
     @Test
     @DisplayName("post_/todos/{todoId}/comments")
     void 댓글저장() throws Exception {
-        AuthUser authUser = new AuthUser(1L, "t@.t", ADMIN);
+
         CommentSaveRequest commentSaveRequest = new CommentSaveRequest("1");
 
         given(commentService.saveComment(any(AuthUser.class), eq(1L), any(CommentSaveRequest.class)))
@@ -67,7 +67,8 @@ public class CommentControllerTest {
         ResultActions resultActions = mockMvc.perform(post("/todos/{todoId}/comments", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(commentSaveRequest))
-                .header("Authorization", "Bearer token"));
+        //        .header("Authorization", "Bearer token")
+        );
 
         resultActions.andExpect(status().isOk());
 
@@ -77,7 +78,7 @@ public class CommentControllerTest {
     @DisplayName("get_/todos/{todoId}/comments")
     void 댓글들_조회()throws Exception{
 
-        given(commentService.getComments(anyLong())).willReturn(List.of());
+//        given(commentService.getComments(anyLong())).willReturn(List.of());
 
         ResultActions resultActions = mockMvc.perform(get("/todos/{todoId}/comments", 1L));
 
