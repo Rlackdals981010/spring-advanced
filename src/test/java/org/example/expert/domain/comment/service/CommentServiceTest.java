@@ -7,7 +7,7 @@ import org.example.expert.domain.comment.entity.Comment;
 import org.example.expert.domain.comment.repository.CommentRepository;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.InvalidRequestException;
-
+import org.example.expert.domain.manager.entity.Manager;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.dto.response.UserResponse;
@@ -18,13 +18,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -67,10 +67,18 @@ class CommentServiceTest {
         CommentSaveRequest request = new CommentSaveRequest("contents");
         AuthUser authUser = new AuthUser(1L, "email", UserRole.USER);
         User user = User.fromAuthUser(authUser);
-        Todo todo = new Todo("title", "title", "contents", user);
-        Comment comment = new Comment(request.getContents(), user, todo);
+        //Todo todo = new Todo("title", "title", "contents", user);
+        Todo todo = Mockito.mock(Todo.class);
 
+        //추가
+        Manager manager = new Manager(user, todo);
+        List<Manager> managers = Collections.singletonList(manager); // user와 일치하는 manager 포함
+        ReflectionTestUtils.setField(todo, "managers", managers);
+
+        given(todo.getManagers()).willReturn(managers); // getManagers() 호출 시 managers 반환
         given(todoRepository.findById(anyLong())).willReturn(Optional.of(todo));
+
+        Comment comment = new Comment(request.getContents(), user, todo);
         given(commentRepository.save(any())).willReturn(comment);
 
         // when
@@ -79,6 +87,7 @@ class CommentServiceTest {
         // then
         assertNotNull(result);
     }
+
 
     @Test
     @DisplayName("getComments 정상 동작")
@@ -118,5 +127,28 @@ class CommentServiceTest {
             assertThat(actual.getUser().getId()).isEqualTo(expected.getUser().getId());
             assertThat(actual.getUser().getEmail()).isEqualTo(expected.getUser().getEmail());
         }
+    }
+
+    @Test
+    @DisplayName("3-12-1 saveComment 추가 기능 예외 췤")
+    void test4(){
+        // given
+        long todoId = 1;
+        CommentSaveRequest request = new CommentSaveRequest("contents");
+        AuthUser authUser = new AuthUser(1L, "email", UserRole.USER);
+        User user = User.fromAuthUser(authUser);
+
+        // Todo 객체 생성 (Manager 없음)
+        Todo todo = new Todo("title", "contents", "weather", user);
+
+        given(todoRepository.findById(anyLong())).willReturn(Optional.of(todo));
+
+        InvalidRequestException exception = assertThrows(InvalidRequestException.class,
+                () -> commentService.saveComment(authUser, todoId, new CommentSaveRequest("1"))
+        );
+
+        assertThat("댓글의 담당자가 아니면 댓글을 달 수 없습니다.").isEqualTo(exception.getMessage());
+        //assertEquals("댓글의 담당자가 아니면 댓글을 달 수 없습니다.", exception.getMessage());
+
     }
 }

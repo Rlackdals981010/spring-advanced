@@ -10,44 +10,36 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @Slf4j
 @Aspect
 public class AspectModule {
 
-    //포인트 컷
+    // 포인트 컷 어노테이션 ver
     @Pointcut("@annotation(org.example.expert.aop.trackAdmin)")
     private void trackAdminAnnotation(){}
 
     @After("trackAdminAnnotation()")
-    public void afterTrackAdmin(JoinPoint joinPoint){
+    public void afterTrackAdmin() {
 
-        Object[] args = joinPoint.getArgs();
-        Long userId = null;
-        for (Object arg : args) {
-            if (arg instanceof Long) {
-                userId = (Long) arg;
-                break;
-            }
-        }
-
-        // API 요청 시각
-        long currentTimeMillis = System.currentTimeMillis();
-        Date date = new Date(currentTimeMillis);
-
-
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String formattedDate = formatter.format(date);
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
         // API 요청 URL
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String requestUrl = request.getRequestURL().toString();
+        // User id
+        Long userId = (Long)request.getAttribute("userId");
+        // API 요청 시각
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = LocalDateTime.now().format(formatter);
 
-        log.info("::: 요청한 사용자의 ID :{} :::" , userId);
+        log.info("::: 요청한 사용자의 ID : {} :::", userId );
         log.info("::: API 요청 시각 : {} :::", formattedDate);
         log.info("::: API 요청 URL : {} :::", requestUrl);
     }
+
 
 
 //    @Pointcut("execution(* org.example.expert.domain.comment.controller.CommentAdminController.deleteComment(*))")

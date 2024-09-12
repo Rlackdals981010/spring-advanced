@@ -28,9 +28,16 @@ public class CommentService {
 
     @Transactional
     public CommentSaveResponse saveComment(AuthUser authUser, long todoId, CommentSaveRequest commentSaveRequest) {
-        User user = User.fromAuthUser(authUser);
+        User user = User.fromAuthUser(authUser); // 접속 유저
         Todo todo = todoRepository.findById(todoId).orElseThrow(() ->
                 new InvalidRequestException("Todo not found"));
+
+        //3-12 추가 기능
+        boolean isManager = todo.getManagers().stream()
+                .anyMatch(manager -> manager.getUser().equals(user));
+        if (!isManager) {
+            throw new InvalidRequestException("댓글의 담당자가 아니면 댓글을 달 수 없습니다.");
+        }
 
         Comment newComment = new Comment(
                 commentSaveRequest.getContents(),
