@@ -48,6 +48,5 @@ public class AspectModuleTest {
         // AspectModule의 afterTrackAdmin 메서드 호출
         aspectModule.afterTrackAdmin(joinPoint);
 
-        // 검증 로직 추가 (여기서는 검증을 생략합니다)
     }
 }

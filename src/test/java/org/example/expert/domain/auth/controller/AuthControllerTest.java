@@ -30,6 +30,7 @@ public class AuthControllerTest {
     @MockBean
     private AuthService authService;
 
+
     @Test
     @DisplayName("post_/auth/signup")
     void 회원가입() throws Exception {
