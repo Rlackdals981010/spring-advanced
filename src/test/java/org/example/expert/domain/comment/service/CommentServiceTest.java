@@ -67,8 +67,7 @@ class CommentServiceTest {
         CommentSaveRequest request = new CommentSaveRequest("contents");
         AuthUser authUser = new AuthUser(1L, "email", UserRole.USER);
         User user = User.fromAuthUser(authUser);
-        //Todo todo = new Todo("title", "title", "contents", user);
-        Todo todo = Mockito.mock(Todo.class);
+        Todo todo = new Todo("title", "title", "contents", user);
 
         //추가
         Manager manager = new Manager(user, todo);
