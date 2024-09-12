@@ -9,6 +9,9 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 @Slf4j
 @Aspect
 public class AspectModule {
@@ -20,7 +23,6 @@ public class AspectModule {
     @After("trackAdminAnnotation()")
     public void afterTrackAdmin(JoinPoint joinPoint){
 
-        // User id
         Object[] args = joinPoint.getArgs();
         Long userId = null;
         for (Object arg : args) {
@@ -31,14 +33,19 @@ public class AspectModule {
         }
 
         // API 요청 시각
-        long start = System.currentTimeMillis();
+        long currentTimeMillis = System.currentTimeMillis();
+        Date date = new Date(currentTimeMillis);
+
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = formatter.format(date);
 
         // API 요청 URL
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String requestUrl = request.getRequestURL().toString();
 
         log.info("::: 요청한 사용자의 ID :{} :::" , userId);
-        log.info("::: API 요청 시각 : {} :::", start);
+        log.info("::: API 요청 시각 : {} :::", formattedDate);
         log.info("::: API 요청 URL : {} :::", requestUrl);
     }
 
